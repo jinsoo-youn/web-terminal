@@ -40,10 +40,18 @@ RUN export TTYD_VERSION="1.7.1" \
  && chmod +x ttyd.${ARCH} && mv ttyd.${ARCH} /usr/bin/ttyd 
 
 # COPY start.sh 
+
+EXPOSE 7681
+
 RUN mkdir -p /opt/webterminal
 COPY start.sh /opt/webterminal
 RUN chmod +x /opt/webterminal/start.sh
 
-# expose 7681 port for ttyd (webterminal server)
-EXPOSE 7681
-ENTRYPOINT ["sh","/opt/webterminal/start.sh"]
+RUN mkdir -p /var/run/secrets/kubernetes.io/serviceaccount
+COPY ca.crt  /var/run/secrets/kubernetes.io/serviceaccount
+COPY token /var/run/secrets/kubernetes.io/serviceaccount
+ENV KUBERNETES_SERVICE_HOST="https://192.168.9.189"
+ENV KUBERNETES_SERVICE_PORT="6443"
+
+#CMD ["ttyd","bash"]
+CMD ["sh","/opt/webterminal/start.sh"]
